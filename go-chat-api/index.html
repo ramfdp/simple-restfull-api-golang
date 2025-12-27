@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Go Chat App</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 20px auto; }
+        #chat-box { height: 300px; border: 1px solid #ccc; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
+        .message { margin-bottom: 5px; }
+        .sender { font-weight: bold; color: blue; }
+    </style>
+</head>
+<body>
+    <h2>Golang WebSocket Chat</h2>
+    
+    <div id="chat-box"></div>
+    
+    <input type="text" id="username" placeholder="Nama Anda" style="width: 20%;">
+    <input type="text" id="message" placeholder="Ketik pesan..." style="width: 60%;">
+    <button onclick="sendMessage()">Kirim</button>
+
+    <script>
+        // Membuat koneksi ke WebSocket Server
+        var ws = new WebSocket("ws://localhost:8080/ws");
+
+        ws.onopen = function() {
+            console.log("Terhubung ke server!");
+            appendMessage("System", "Terhubung ke chat server...");
+        };
+
+        ws.onmessage = function(event) {
+            // Parsing JSON yang diterima dari server
+            var msg = JSON.parse(event.data);
+            appendMessage(msg.sender, msg.content);
+        };
+
+        ws.onerror = function(error) {
+            console.log("Error WebSocket: ", error);
+        };
+
+        function sendMessage() {
+            var inputUser = document.getElementById("username");
+            var inputMsg = document.getElementById("message");
+
+            if (inputMsg.value === "") return;
+
+            var msgObj = {
+                sender: inputUser.value || "Anonim", // Default jika kosong
+                content: inputMsg.value
+            };
+
+            // Mengirim data JSON ke server
+            ws.send(JSON.stringify(msgObj));
+
+            inputMsg.value = ""; // Kosongkan input setelah kirim
+        }
+
+        function appendMessage(sender, message) {
+            var box = document.getElementById("chat-box");
+            var div = document.createElement("div");
+            div.className = "message";
+            div.innerHTML = `<span class="sender">${sender}:</span> ${message}`;
+            box.appendChild(div);
+            
+            // Auto scroll ke bawah
+            box.scrollTop = box.scrollHeight;
+        }
+    </script>
+</body>
+</html>
