@@ -30,7 +30,7 @@ func main() {
 
 	r.GET("/", func(c *gin.Context) {
 		c.File("index.html")
-	})
+	}) // comment if you dont wanna user html
 
 	r.GET("/messages", func(c *gin.Context) {
 		var messages []models.Message
